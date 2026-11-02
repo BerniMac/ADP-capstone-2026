@@ -1,0 +1,26 @@
+package Capstone.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+/** Mirrors the JSON the backend sends for Customer. Unknown fields are ignored. */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Customer {
+    private String customerId;
+    private String name;
+    private String email;
+    private String phone;
+
+    public Customer() {}
+
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+}
