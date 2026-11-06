@@ -26,6 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/error").permitAll()
                         // Only the owner may manage staff accounts
                         .requestMatchers("/api/staff", "/api/staff/**").hasRole("OWNER")
+                        // Only the owner may see the sales dashboard
+                        .requestMatchers("/api/dashboard", "/api/dashboard/**").hasRole("OWNER")
                         // Only staff and the owner may add, change or delete products
                         .requestMatchers(HttpMethod.POST, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")

@@ -43,7 +43,7 @@ public class MainFrame extends JFrame {
         }
         if (Session.isOwner()) {
             tabs.addTab("Staff", new StaffPanel());
-            tabs.addTab("Dashboard", placeholder("Sales Dashboard - coming next"));
+            tabs.addTab("Dashboard", new DashboardPanel());
         }
 
         // Refresh a tab each time it is opened so it always shows current data
