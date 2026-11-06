@@ -42,6 +42,7 @@ public class MainFrame extends JFrame {
             tabs.addTab("Manage Products", new AdminProductsPanel());
         }
         if (Session.isOwner()) {
+            tabs.addTab("Staff", new StaffPanel());
             tabs.addTab("Dashboard", placeholder("Sales Dashboard - coming next"));
         }
 

@@ -83,7 +83,7 @@ public class AuthController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
-    private static String checkPassword(String password) {
+    static String checkPassword(String password) {
         if (password.length() < MIN_PASSWORD) {
             return "Your password must be at least " + MIN_PASSWORD + " characters.";
         }

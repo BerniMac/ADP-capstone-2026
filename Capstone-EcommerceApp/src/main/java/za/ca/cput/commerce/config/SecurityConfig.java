@@ -24,6 +24,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/error").permitAll()
+                        // Only the owner may manage staff accounts
+                        .requestMatchers("/api/staff", "/api/staff/**").hasRole("OWNER")
                         // Only staff and the owner may add, change or delete products
                         .requestMatchers(HttpMethod.POST, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
