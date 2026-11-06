@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import za.ca.cput.commerce.domain.Customer;
 import za.ca.cput.commerce.domain.Product;
+import za.ca.cput.commerce.domain.Role;
 import za.ca.cput.commerce.factory.CustomerFactory;
 import za.ca.cput.commerce.factory.InventoryFactory;
 import za.ca.cput.commerce.repository.CustomerRepository;
@@ -23,6 +24,9 @@ public class DataSeeder implements CommandLineRunner {
 
     private static final String DEMO_EMAIL = "demo@legendarysprays.co.za";
     private static final String DEMO_PASSWORD = "Demo@1234";
+
+    private static final String OWNER_EMAIL = "owner@legendarysprays.co.za";
+    private static final String OWNER_PASSWORD = "Owner@1234";
 
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
@@ -67,6 +71,16 @@ public class DataSeeder implements CommandLineRunner {
             // Demo account created before passwords existed
             customerRepository.updatePasswordHash(
                     existingDemo.get().getCustomerId(), passwordEncoder.encode(DEMO_PASSWORD));
+        }
+
+        // 1b. The store owner (can manage products, staff and see sales)
+        if (customerRepository.findByEmailIgnoreCase(OWNER_EMAIL).isEmpty()) {
+            Customer owner = CustomerFactory.createCustomer("Store Owner", OWNER_EMAIL, "0829876543",
+                    passwordEncoder.encode(OWNER_PASSWORD), Role.OWNER);
+
+            if (owner != null){
+                customerRepository.save(owner);
+            }
         }
 
         // 2. The product range

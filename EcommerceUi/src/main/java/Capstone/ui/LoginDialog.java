@@ -14,7 +14,6 @@ import java.util.Map;
 public class LoginDialog extends JDialog {
 
     private static final String DEMO_EMAIL = "demo@legendarysprays.co.za";
-    private static final String DEMO_PASSWORD_HINT = "Demo@1234";
 
     private boolean signedIn = false;
 
@@ -113,7 +112,6 @@ public class LoginDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
-        panel.add(Theme.muted("<html>Demo account:<br>" + DEMO_EMAIL + " / " + DEMO_PASSWORD_HINT + "</html>"), gbc);
 
         gbc.gridy = 3;
         gbc.insets = new Insets(18, 4, 4, 4);

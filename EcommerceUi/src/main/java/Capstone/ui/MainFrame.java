@@ -38,6 +38,12 @@ public class MainFrame extends JFrame {
         tabs.addTab("My Orders", new OrderShipmentPanel());
         tabs.addTab("Reviews", new ReviewPanel());
         tabs.addTab("My Account", new CustomerDashboardPanel());
+        if (Session.isStaff()) {
+            tabs.addTab("Manage Products", placeholder("Manage Products - coming next"));
+        }
+        if (Session.isOwner()) {
+            tabs.addTab("Dashboard", placeholder("Sales Dashboard - coming next"));
+        }
 
         // Refresh a tab each time it is opened so it always shows current data
         tabs.addChangeListener(e -> {
@@ -74,6 +80,9 @@ public class MainFrame extends JFrame {
 
         String name = Session.customer() == null ? "" : Session.customer().getName();
         right.add(Theme.label("Hi, " + name, Font.PLAIN, 14f, Color.WHITE));
+        if (Session.isStaff()) {
+            right.add(Theme.label(Session.role(), Font.BOLD, 12f, new Color(0xFFC27A)));
+        }
 
         JButton signOut = Theme.onDark("Sign out");
         signOut.addActionListener(e -> signOut());
@@ -84,6 +93,13 @@ public class MainFrame extends JFrame {
 
         header.add(right, BorderLayout.EAST);
         return header;
+    }
+
+    private JPanel placeholder(String text) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Theme.BG);
+        panel.add(Theme.title(text));
+        return panel;
     }
 
     private JPanel createFooter() {

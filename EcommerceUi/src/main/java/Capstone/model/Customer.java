@@ -9,6 +9,7 @@ public class Customer {
     private String name;
     private String email;
     private String phone;
+    private String role;
 
     public Customer() {}
 
@@ -23,4 +24,7 @@ public class Customer {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) {this.role = role;}
 }

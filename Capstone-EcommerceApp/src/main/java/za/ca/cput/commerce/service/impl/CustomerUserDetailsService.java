@@ -37,7 +37,7 @@ public class CustomerUserDetailsService implements UserDetailsService {
 
         return User.withUsername(customer.getEmail())
                 .password(hash)
-                .roles("CUSTOMER")
+                .roles(customer.getRole().name())
                 .build();
     }
 }

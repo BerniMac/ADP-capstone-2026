@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 /**
  * Every endpoint needs a signed-in customer (email + password, HTTP Basic) except registration.
@@ -23,6 +24,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/error").permitAll()
+                        // Only staff and the owner may add, change or delete products
+                        .requestMatchers(HttpMethod.POST, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products", "/api/products/**").hasAnyRole("STAFF", "OWNER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

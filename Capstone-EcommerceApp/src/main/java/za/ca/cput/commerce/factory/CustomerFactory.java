@@ -6,6 +6,7 @@
 package za.ca.cput.commerce.factory;
 
 import za.ca.cput.commerce.domain.Customer;
+import za.ca.cput.commerce.domain.Role;
 
 public class CustomerFactory {
 
@@ -45,6 +46,19 @@ public class CustomerFactory {
         return new Customer.Builder()
                 .copy(base)
                 .setPasswordHash(passwordHash)
+                .build();
+    }
+
+    /** Same as above, but with a chosen role (used for staff and owner accounts). */
+    public static Customer createCustomer(String name, String email, String phone, String passwordHash, Role role){
+        Customer base = createCustomer(name, email, phone, passwordHash);
+        if (base == null) {
+            return null;
+        }
+
+        return new Customer.Builder()
+                .copy(base)
+                .setRole(role)
                 .build();
     }
 }

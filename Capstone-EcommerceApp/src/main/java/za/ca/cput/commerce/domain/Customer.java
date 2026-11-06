@@ -31,6 +31,9 @@ public class Customer {
     // BCrypt hash of the password. The plain password is never stored or sent to clients.
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @JsonManagedReference("customer-address")
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses;
@@ -60,6 +63,7 @@ public class Customer {
         this.email = builder.email;
         this.phone = builder.phone;
         this.passwordHash = builder.passwordHash;
+        this.role = builder.role == null ? Role.CUSTOMER : builder.role;
 
         this.addresses = new ArrayList<>();
         this.orders = new ArrayList<>();
@@ -91,6 +95,8 @@ public class Customer {
     public String getPasswordHash() {
         return passwordHash;
     }
+
+    public Role getRole(){return role == null ? Role.CUSTOMER : role; }
 
     public List<Address> getAddresses() {
         return addresses;
@@ -175,6 +181,7 @@ public class Customer {
         private String email;
         private String phone;
         private String passwordHash;
+        private Role role;
 
         public Builder setCustomerId(String customerId) {
             this.customerId = customerId;
@@ -202,12 +209,19 @@ public class Customer {
             return this;
         }
 
+        @JsonIgnore
+        public Builder setRole(Role role){
+            this.role = role;
+            return this;
+        }
+
         public Builder copy(Customer customer) {
             this.customerId = customer.customerId;
             this.name = customer.name;
             this.email = customer.email;
             this.phone = customer.phone;
             this.passwordHash = customer.passwordHash;
+            this.role = customer.role;
             return this;
         }
 
