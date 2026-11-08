@@ -48,6 +48,7 @@ public class OrderShipmentPanel extends JPanel {
     private final JLabel shipDate = valueLabel();
     private final JLabel shipEta = valueLabel();
     private final JButton advance = Theme.primary("Advance shipment (demo)");
+    private final JButton cancelOrder = Theme.ghost("Cancel order");
 
     private final JLabel emptyState = Theme.muted(" ");
 
@@ -82,6 +83,8 @@ public class OrderShipmentPanel extends JPanel {
         });
         advance.addActionListener(e -> advanceShipment());
         advance.setVisible(false);
+        cancelOrder.addActionListener(e -> cancelSelected());
+        cancelOrder.setVisible(false);
 
         itemsTable.getColumnModel().getColumn(0).setPreferredWidth(260);
         itemsTable.getColumnModel().getColumn(1).setPreferredWidth(50);
@@ -148,7 +151,11 @@ public class OrderShipmentPanel extends JPanel {
         JPanel shipWrap = new JPanel(new BorderLayout(0, 8));
         shipWrap.setOpaque(false);
         shipWrap.add(shipBox, BorderLayout.CENTER);
-        shipWrap.add(advance, BorderLayout.SOUTH);
+        JPanel buttons = new JPanel(new GridLayout(0, 1, 0, 6));
+        buttons.setOpaque(false);
+        buttons.add(advance);
+        buttons.add(cancelOrder);
+        shipWrap.add(buttons, BorderLayout.SOUTH);
         bottom.add(shipWrap);
         card.add(bottom, BorderLayout.SOUTH);
         return card;
@@ -264,12 +271,14 @@ public class OrderShipmentPanel extends JPanel {
             shipDate.setText("-");
             shipEta.setText("-");
             advance.setVisible(false);
+            cancelOrder.setVisible(false);
         } else {
             shipAddress.setText(Theme.html("Deliver to: " + shipment.getAddress(), 230));
             shipDate.setText(shipment.getShipmentDate() == null ? "-" : shipment.getShipmentDate().format(DATE));
             shipEta.setText(shipment.getDeliveryDate() == null ? "-" : shipment.getDeliveryDate().format(DATE));
             boolean done = "DELIVERED".equals(status);
-            advance.setVisible(true);
+            advance.setVisible(!"CANCELLED".equals(status));
+            cancelOrder.setVisible("PROCESSING".equals(status));
             advance.setEnabled(!done);
             advance.setText(done ? "Delivered" : "Advance shipment (demo)");
         }
@@ -288,6 +297,7 @@ public class OrderShipmentPanel extends JPanel {
             label.setText(" ");
         }
         advance.setVisible(false);
+        cancelOrder.setVisible(false);
     }
 
     // ---------- moving the shipment along (demo of PUT /api/shipments) ----------
@@ -319,6 +329,34 @@ public class OrderShipmentPanel extends JPanel {
                     advance.setEnabled(true);
                     Theme.error(this, Theme.friendly(error));
                 });
+    }
+
+    // ---------- cancelling an order ----------
+
+    private void cancelSelected() {
+        if (selected == null) {
+            return;
+        }
+        Order order = selected;
+
+        int answer = JOptionPane.showConfirmDialog(this,
+                "Cancel order " + shortId(order) + "?\nYour items go back into stock and your payment is refunded.",
+                "Cancel order", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (answer != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        cancelOrder.setEnabled(false);
+        Api.async(() -> {
+            Api.put("/orders/" + order.getOrderId() + "/cancel", null);
+            return Boolean.TRUE;
+        }, ok -> {
+            cancelOrder.setEnabled(true);
+            load(order.getOrderId());
+        }, error -> {
+            cancelOrder.setEnabled(true);
+            Theme.error(this, Theme.friendly(error));
+        });
     }
 
     // ---------- helpers ----------
@@ -356,6 +394,7 @@ public class OrderShipmentPanel extends JPanel {
         return switch (status) {
             case "SHIPPED" -> "Shipped";
             case "DELIVERED" -> "Delivered";
+            case "CANCELLED" -> "Cancelled";
             default -> "Processing";
         };
     }
@@ -364,6 +403,7 @@ public class OrderShipmentPanel extends JPanel {
         return switch (status) {
             case "SHIPPED" -> Theme.PRIMARY;
             case "DELIVERED" -> Theme.SUCCESS;
+            case "CANCELLED" -> Theme.DANGER;
             default -> Theme.WARN;
         };
     }

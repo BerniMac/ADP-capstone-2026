@@ -58,7 +58,10 @@ public class DashboardController {
     public DashboardData dashboard() {
 
         // 1. Summary numbers
-        List<Order> allOrders = orders.findAll();
+        // Canceled orders do not count as sales
+        List<Order> allOrders = orders.findAll().stream()
+                .filter(o -> !isCancelled(o))
+                .toList();
         double totalSales = allOrders.stream().mapToDouble(Order::getTotalAmount).sum();
         int orderCount = allOrders.size();
         double average = orderCount == 0 ? 0 : totalSales / orderCount;
@@ -70,6 +73,7 @@ public class DashboardController {
 
         // 2. Best sellers: group every order line by product, then rank by units sold
         Map<String, List<OrderItem>> linesByProduct = orderItems.findAll().stream()
+                .filter(line -> !isCancelled(line.getOrder()))
                 .collect(Collectors.groupingBy(line -> line.getProduct().getProductId()));
 
         List<BestSeller> bestSellers = linesByProduct.values().stream()
@@ -104,6 +108,11 @@ public class DashboardController {
                 .toList();
 
         return new DashboardData(summary, bestSellers, recentOrders, lowStock);
+    }
+
+    private static boolean isCancelled(Order order) {
+        return order.getShipment() != null
+                && "CANCELLED".equalsIgnoreCase(order.getShipment().getStatus());
     }
 
     private static double round(double value) {

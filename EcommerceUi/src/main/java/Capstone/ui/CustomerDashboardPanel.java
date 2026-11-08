@@ -125,10 +125,16 @@ public class CustomerDashboardPanel extends JPanel {
                 orders -> {
                     List<Order> list = orders == null ? new ArrayList<>() : orders;
                     double spent = 0;
+                    int placed = 0;
                     for (Order order : list) {
-                        spent += order.getTotalAmount();
+                        boolean cancelled = order.getShipment() != null
+                                && "CANCELLED".equalsIgnoreCase(order.getShipment().getStatus());
+                        if (!cancelled) {
+                            spent += order.getTotalAmount();
+                            placed++;
+                        }
                     }
-                    ordersStat.setText(String.valueOf(list.size()));
+                    ordersStat.setText(String.valueOf(placed));
                     spentStat.setText(Theme.money(spent));
                 }, this::fail);
 
