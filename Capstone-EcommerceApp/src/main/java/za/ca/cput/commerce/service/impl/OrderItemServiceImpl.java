@@ -4,6 +4,8 @@ package za.ca.cput.commerce.service.impl;
 Author: Joshua Jonathan Bird - 230444032
 12/07/2026
  */
+import org.springframework.transaction.annotation.Transactional;
+import za.ca.cput.commerce.repository.InventoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,13 +24,16 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
 
     public OrderItemServiceImpl(OrderItemRepository orderItemRepository,
                                 OrderRepository orderRepository,
-                                ProductRepository productRepository) {
+                                ProductRepository productRepository,
+                                InventoryRepository inventoryRepository) {
         this.orderItemRepository = orderItemRepository;
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     @Override
@@ -53,6 +58,31 @@ public class OrderItemServiceImpl implements OrderItemService {
         }
 
         return orderItemRepository.save(orderItem);
+    }
+
+    @Override
+    @Transactional
+    public OrderItem createWithStock(OrderItem orderItem) {
+
+        if (orderItem == null || orderItem.getQuantity() <= 0 || orderItem.getProduct() == null) {
+            return null;
+        }
+
+        // The usual checks and save: the order and the product must exist
+        OrderItem created = create(orderItem);
+        if (created == null) {
+            return null;
+        }
+
+        // Take the items out of stock. If there is not enough, undo the save.
+        int changed = inventoryRepository.reduceStock(
+                orderItem.getProduct().getProductId(), orderItem.getQuantity());
+        if (changed == 0) {
+            orderItemRepository.deleteById(created.getOrderItemId());
+            return null;
+        }
+
+        return created;
     }
 
     @Override

@@ -14,6 +14,8 @@ public interface OrderItemService {
 
     OrderItem create(OrderItem orderItem);
 
+    OrderItem createWithStock(OrderItem orderItem);
+
     OrderItem read(String orderItemId);
 
     OrderItem update(String orderItemId, OrderItem orderItem);

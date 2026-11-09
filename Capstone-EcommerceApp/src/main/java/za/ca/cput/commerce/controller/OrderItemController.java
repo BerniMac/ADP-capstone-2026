@@ -28,7 +28,7 @@ public class OrderItemController {
 
     @PostMapping
     public ResponseEntity<OrderItem> create(@RequestBody OrderItem orderItem) {
-        OrderItem created = service.create(orderItem);
+        OrderItem created = service.createWithStock(orderItem);
 
         if (created == null) {
             return ResponseEntity.badRequest().build();

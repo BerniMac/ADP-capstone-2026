@@ -86,7 +86,6 @@ public final class CheckoutService {
         }
         String orderId = order.getOrderId();
 
-        List<Cart.Line> reduced = new ArrayList<>();
         LocalDateTime delivery5 = now.plusDays(5);
 
         try {
@@ -139,24 +138,11 @@ public final class CheckoutService {
             shipment.put("status", "PROCESSING");
             Api.post("/shipments", shipment);
 
-            // 7. Take the items out of stock
-            progress.accept("Updating stock...");
-            for (Cart.Line line : lines) {
-                updateStock(stock.get(line.getProduct().getProductId()),
-                        line.getProduct().getProductId(), -line.getQuantity());
-                reduced.add(line);
-            }
+
 
         } catch (Exception e) {
             progress.accept("Something went wrong, undoing the order...");
-            for (Cart.Line line : reduced) {
-                try {
-                    updateStock(stock.get(line.getProduct().getProductId()),
-                            line.getProduct().getProductId(), 0);
-                } catch (Exception ignored) {
-                    // best effort
-                }
-            }
+
             try {
                 Api.delete("/orders/" + orderId);
             } catch (Exception ignored) {
@@ -183,18 +169,7 @@ public final class CheckoutService {
 
         return new Receipt(orderId, total, delivery5);
     }
-
-    /**
-     * Sets stock to (original - quantity). Pass a negative number to reduce stock,
-     * or 0 to put the original level back.
-     */
-    private static void updateStock(Inventory original, String productId, int change) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("product", Map.of("productId", productId));
-        body.put("stockQuantity", original.getStockQuantity() + change);
-        body.put("warehouseLocation", original.getWarehouseLocation());
-        Api.put("/inventory/" + original.getInventoryId(), body);
-    }
+    
 
     private static void saveAddressIfNew(String customerId, Delivery d) throws Exception {
         List<Capstone.model.Address> saved = Api.get("/addresses/customer/" + customerId,

@@ -4,6 +4,8 @@ package za.ca.cput.commerce.controller;
 Author: Joshua Jonathan Bird - 230444032
 2026/07/19
 */
+
+import java.security.Principal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,13 +62,22 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    public ResponseEntity<Void> delete(@PathVariable String id, Principal principal) {
 
-        if (service.delete(id)) {
-            return ResponseEntity.noContent().build();
+        Order order = service.read(id);
+        if (order == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        // A customer may only undo their own order, and only while checkout is unfinished.
+        // A finished order has a shipment and is cancelled with PUT /api/orders/{id}/cancel instead.
+        boolean isTheirOrder = order.getCustomer().getEmail().equalsIgnoreCase(principal.getName());
+        if (!isTheirOrder || order.getShipment() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
